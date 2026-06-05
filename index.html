@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f1e8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="上岸计时局">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>上岸计时局</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="上岸计时局首页">
+      <span class="brand-mark" aria-hidden="true">
+        <span></span>
+      </span>
+      <span>
+        <strong>上岸计时局</strong>
+        <small>把今天认真过完</small>
+      </span>
+    </a>
+
+    <div class="topbar-right">
+      <div class="date-chip">
+        <span class="date-dot"></span>
+        <span id="todayLabel"></span>
+      </div>
+      <div class="local-chip">数据仅保存在本机</div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero-grid">
+      <article class="card timer-card">
+        <div class="timer-topline">
+          <div>
+            <p class="eyebrow">FOCUS ROOM</p>
+            <h1>这次，专注做什么？</h1>
+          </div>
+          <div class="mode-switch" role="group" aria-label="计时模式">
+            <button class="mode-button active" data-mode="countup" type="button">正计时</button>
+            <button class="mode-button" data-mode="countdown" type="button">倒计时</button>
+          </div>
+        </div>
+
+        <div class="session-fields">
+          <label>
+            <span>学习科目</span>
+            <select id="subjectSelect">
+              <option value="行测">行测</option>
+              <option value="申论">申论</option>
+              <option value="常识">常识</option>
+              <option value="面试">面试</option>
+              <option value="其他">其他</option>
+            </select>
+          </label>
+          <label>
+            <span>关联待办</span>
+            <select id="taskSelect">
+              <option value="">不关联待办</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="countdown-settings" id="countdownSettings" hidden>
+          <span>专注时长</span>
+          <div class="preset-row">
+            <button class="preset-button" type="button" data-minutes="25">25 分钟</button>
+            <button class="preset-button active" type="button" data-minutes="50">50 分钟</button>
+            <button class="preset-button" type="button" data-minutes="90">90 分钟</button>
+            <label class="custom-minutes">
+              <input id="customMinutes" type="number" min="1" max="720" value="50" aria-label="自定义分钟数">
+              <span>分钟</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="timer-stage">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="timer-ring" id="timerRing">
+            <div class="timer-ring-inner">
+              <span class="timer-status" id="timerStatus">准备开始</span>
+              <strong class="timer-display" id="timerDisplay">00:00:00</strong>
+              <span class="timer-caption" id="timerCaption">自由正计时</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="session-meta" aria-live="polite">
+          <span><i class="meta-dot focus-dot"></i>本次专注 <strong id="sessionFocusTime">0 分钟</strong></span>
+          <span><i class="meta-dot pause-dot"></i>暂停累计 <strong id="sessionPauseTime">0 分钟</strong></span>
+        </div>
+
+        <div class="timer-actions">
+          <button class="button button-primary button-large" id="startButton" type="button">
+            <span class="play-icon" aria-hidden="true"></span>
+            <span>开始专注</span>
+          </button>
+          <button class="button button-secondary button-large" id="pauseButton" type="button" hidden>
+            <span class="pause-icon" aria-hidden="true"></span>
+            <span>暂停一下</span>
+          </button>
+          <button class="button button-ghost button-large" id="finishButton" type="button" disabled>
+            结束并记录
+          </button>
+        </div>
+        <p class="timer-note">暂停时间会单独记录，不计入专注时长。</p>
+      </article>
+
+      <aside class="side-stack knowledge-side">
+        <article class="card knowledge-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">KNOWLEDGE NOTES</p>
+              <h2>重要知识点</h2>
+            </div>
+            <span class="count-badge" id="knowledgeCountBadge">0 条待掌握</span>
+          </div>
+
+          <form class="knowledge-form" id="knowledgeForm">
+            <select id="knowledgeSubjectInput" aria-label="知识点科目">
+              <option value="行测">行测</option>
+              <option value="申论">申论</option>
+              <option value="常识">常识</option>
+              <option value="面试">面试</option>
+              <option value="其他">其他</option>
+            </select>
+            <textarea id="knowledgeContentInput" rows="3" maxlength="500" placeholder="把不会、容易混淆或需要反复记忆的知识点写在这里……" required></textarea>
+            <label class="pin-on-add">
+              <input id="knowledgePinInput" type="checkbox">
+              <span>直接置顶</span>
+            </label>
+            <button class="button button-dark" type="submit">记下知识点</button>
+          </form>
+
+          <div class="knowledge-toolbar">
+            <div class="knowledge-filters" role="group" aria-label="筛选知识点">
+              <button class="knowledge-filter active" type="button" data-knowledge-filter="learning">待掌握</button>
+              <button class="knowledge-filter" type="button" data-knowledge-filter="all">全部</button>
+              <button class="knowledge-filter" type="button" data-knowledge-filter="mastered">已掌握</button>
+            </div>
+          </div>
+
+          <div class="knowledge-list" id="knowledgeList">
+            <div class="empty-state knowledge-empty">
+              <span class="empty-note"></span>
+              <p>暂时没有待掌握的知识点。遇到不会的，就立刻记下来。</p>
+            </div>
+          </div>
+        </article>
+      </aside>
+    </section>
+
+    <section class="content-grid">
+      <article class="card task-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">TO-DO</p>
+            <h2>学习待办</h2>
+          </div>
+          <span class="count-badge" id="taskCountBadge">0 项未完成</span>
+        </div>
+
+        <form class="task-form" id="taskForm">
+          <input id="taskTitleInput" type="text" maxlength="80" placeholder="例如：完成一套资料分析题" required>
+          <select id="taskSubjectInput" aria-label="待办科目">
+            <option value="行测">行测</option>
+            <option value="申论">申论</option>
+            <option value="常识">常识</option>
+            <option value="面试">面试</option>
+            <option value="其他">其他</option>
+          </select>
+          <label class="estimate-field">
+            <input id="taskEstimateInput" type="number" min="1" max="720" value="50" aria-label="预计分钟数">
+            <span>分钟</span>
+          </label>
+          <button class="button button-dark" type="submit">加入待办</button>
+        </form>
+
+        <div class="task-list" id="taskList">
+          <div class="empty-state">
+            <span class="empty-lines"></span>
+            <p>还没有待办，先写下今天最重要的一件事。</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="card trend-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">LAST 7 DAYS</p>
+            <h2>近七天专注</h2>
+          </div>
+          <strong class="week-total" id="weekTotal">共 0 分钟</strong>
+        </div>
+        <div class="trend-chart" id="trendChart" aria-label="近七天专注时长图表"></div>
+        <div class="trend-footer">
+          <span><i class="legend-dot"></i>每日专注时长</span>
+          <span id="bestDayText">开始记录后，这里会显示状态最好的一天</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="stats-overview">
+      <article class="card goal-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">TODAY</p>
+            <h2>今日专注目标</h2>
+          </div>
+          <button class="icon-button" id="editGoalButton" type="button" aria-label="修改今日目标">设置</button>
+        </div>
+
+        <div class="goal-visual">
+          <div class="goal-number">
+            <strong id="goalPercent">0%</strong>
+            <span>完成进度</span>
+          </div>
+          <div class="goal-track">
+            <span id="goalTrackFill"></span>
+          </div>
+          <div class="goal-copy">
+            <span id="todayFocusText">已专注 0 分钟</span>
+            <span id="dailyGoalText">目标 240 分钟</span>
+          </div>
+        </div>
+        <p class="encouragement" id="encouragement">先坐下来，今天就已经开始了。</p>
+      </article>
+
+      <div class="metric-grid">
+        <article class="card metric-card">
+          <span class="metric-shape metric-shape-orange"></span>
+          <span>连续专注</span>
+          <strong><b id="streakDays">0</b> 天</strong>
+          <small>保持自己的节奏</small>
+        </article>
+        <article class="card metric-card">
+          <span class="metric-shape metric-shape-blue"></span>
+          <span>今日完成</span>
+          <strong><b id="todayDoneTasks">0</b> 项</strong>
+          <small>完成的待办任务</small>
+        </article>
+      </div>
+
+      <article class="card day-quote-card">
+        <div class="quote-mark">“</div>
+        <p id="dailyQuote">不追赶别人，只完成今天的刻度。</p>
+        <span>今日提醒</span>
+      </article>
+    </section>
+
+    <section class="card records-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">FOCUS LOG</p>
+          <h2>专注记录</h2>
+        </div>
+        <span class="records-total" id="recordsTotal">共记录 0 次</span>
+      </div>
+      <div class="records-list" id="recordsList">
+        <div class="empty-state records-empty">
+          <span class="empty-clock"></span>
+          <p>第一段专注结束后，记录会出现在这里。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="modal" id="reviewDialog">
+    <form method="dialog" id="reviewForm">
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">SESSION REVIEW</p>
+          <h2>这一段，完成得怎么样？</h2>
+        </div>
+        <button class="modal-close" id="reviewCloseButton" value="cancel" type="submit" aria-label="返回计时">×</button>
+      </div>
+
+      <div class="review-summary">
+        <div>
+          <span>专注时长</span>
+          <strong id="reviewFocusTime">0 分钟</strong>
+        </div>
+        <div>
+          <span>暂停时长</span>
+          <strong id="reviewPauseTime">0 分钟</strong>
+        </div>
+        <div>
+          <span>学习科目</span>
+          <strong id="reviewSubject">行测</strong>
+        </div>
+      </div>
+
+      <label class="modal-field">
+        <span>这次学习了什么？</span>
+        <textarea id="reviewContent" rows="3" maxlength="300" placeholder="例如：完成资料分析第 1—20 题，整理了速算技巧" required></textarea>
+      </label>
+
+      <fieldset class="completion-field">
+        <legend>完成情况</legend>
+        <label>
+          <input type="radio" name="completion" value="完成" checked>
+          <span><i class="completion-dot done"></i>完成目标</span>
+        </label>
+        <label>
+          <input type="radio" name="completion" value="有进展">
+          <span><i class="completion-dot progress"></i>有进展</span>
+        </label>
+        <label>
+          <input type="radio" name="completion" value="未完成">
+          <span><i class="completion-dot unfinished"></i>未完成</span>
+        </label>
+      </fieldset>
+
+      <div class="modal-actions">
+        <button class="button button-ghost" id="returnToTimerButton" value="cancel" type="submit">返回计时</button>
+        <button class="button button-primary" id="saveReviewButton" value="default" type="submit">保存本次记录</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal goal-modal" id="goalDialog">
+    <form method="dialog" id="goalForm">
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">DAILY GOAL</p>
+          <h2>设置每日专注目标</h2>
+        </div>
+        <button class="modal-close" value="cancel" type="submit" aria-label="关闭">×</button>
+      </div>
+      <label class="modal-field">
+        <span>每天计划专注多少分钟？</span>
+        <div class="goal-input-wrap">
+          <input id="dailyGoalInput" type="number" min="10" max="1440" step="10" required>
+          <span>分钟</span>
+        </div>
+      </label>
+      <div class="quick-goals">
+        <button type="button" data-goal="120">2 小时</button>
+        <button type="button" data-goal="240">4 小时</button>
+        <button type="button" data-goal="360">6 小时</button>
+        <button type="button" data-goal="480">8 小时</button>
+      </div>
+      <div class="modal-actions">
+        <button class="button button-ghost" value="cancel" type="submit">取消</button>
+        <button class="button button-primary" value="default" type="submit">保存目标</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
